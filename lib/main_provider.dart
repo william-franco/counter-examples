@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -95,11 +96,11 @@ class _CounterViewState extends State<CounterView> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text('You have pushed the button this many times:'),
-            ListenableBuilder(
-              listenable: counterViewModel,
-              builder: (context, child) {
+            StateBuilderWidget<CounterViewModel>(
+              viewModel: counterViewModel,
+              builder: (context, state) {
                 return Text(
-                  '${counterViewModel.model.counter}',
+                  '${state.model.counter}',
                   style: Theme.of(context).textTheme.headlineMedium,
                 );
               },
@@ -127,6 +128,32 @@ class _CounterViewState extends State<CounterView> {
             },
           ),
         ],
+      ),
+    );
+  }
+}
+
+@protected
+typedef StateBuilder<S> = Widget Function(BuildContext context, S state);
+
+class StateBuilderWidget<T extends ChangeNotifier> extends StatelessWidget {
+  final T viewModel;
+  final StateBuilder<T> builder;
+
+  const StateBuilderWidget({
+    super.key,
+    required this.builder,
+    required this.viewModel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider<T>.value(
+      value: viewModel,
+      child: Consumer<T>(
+        builder: (context, notifier, child) {
+          return builder(context, notifier);
+        },
       ),
     );
   }

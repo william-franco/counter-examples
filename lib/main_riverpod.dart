@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -21,6 +23,11 @@ class MyApp extends StatelessWidget {
   }
 }
 
+final counterViewModelProvider =
+    NotifierProvider.autoDispose<CounterViewModel, CounterModel>(
+      CounterViewModelImpl.new,
+    );
+
 class CounterModel {
   final int counter;
 
@@ -30,7 +37,7 @@ class CounterModel {
       CounterModel(counter: counter ?? this.counter);
 }
 
-typedef _ViewModel = ChangeNotifier;
+typedef _ViewModel = Notifier<CounterModel>;
 
 abstract interface class CounterViewModel extends _ViewModel {
   CounterModel get model;
@@ -40,49 +47,49 @@ abstract interface class CounterViewModel extends _ViewModel {
 }
 
 class CounterViewModelImpl extends _ViewModel implements CounterViewModel {
-  CounterModel _model = CounterModel();
+  @override
+  CounterModel build() {
+    return CounterModel();
+  }
 
   @override
-  CounterModel get model => _model;
+  CounterModel get model => state;
 
   @override
   void increment() {
-    _model = _model.copyWith(counter: _model.counter + 1);
+    state = state.copyWith(counter: state.counter + 1);
     _debug();
   }
 
   @override
   void decrement() {
-    _model = _model.copyWith(counter: _model.counter - 1);
+    state = state.copyWith(counter: state.counter - 1);
     _debug();
   }
 
   void _debug() {
-    notifyListeners();
-    debugPrint('Counter: ${model.counter}');
+    debugPrint('Counter: ${state.counter}');
   }
 }
 
-class CounterView extends StatefulWidget {
+class CounterView extends ConsumerStatefulWidget {
   const CounterView({super.key});
 
   @override
-  State<CounterView> createState() => _CounterViewState();
+  ConsumerState<CounterView> createState() => _CounterViewState();
 }
 
-class _CounterViewState extends State<CounterView> {
-  late final CounterViewModel counterViewModel;
-
+class _CounterViewState extends ConsumerState<CounterView> {
   @override
   void initState() {
     super.initState();
-    counterViewModel = CounterViewModelImpl();
-    debugPrint('COUNTER HASHCODE: ${counterViewModel.hashCode}');
+    debugPrint(
+      'COUNTER HASHCODE: ${ref.read(counterViewModelProvider.notifier).hashCode}',
+    );
   }
 
   @override
   void dispose() {
-    counterViewModel.dispose();
     super.dispose();
   }
 
@@ -95,11 +102,11 @@ class _CounterViewState extends State<CounterView> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text('You have pushed the button this many times:'),
-            ListenableBuilder(
-              listenable: counterViewModel,
-              builder: (context, child) {
+            StateBuilderWidget<CounterModel>(
+              provider: counterViewModelProvider,
+              builder: (context, state) {
                 return Text(
-                  '${counterViewModel.model.counter}',
+                  '${state.counter}',
                   style: Theme.of(context).textTheme.headlineMedium,
                 );
               },
@@ -115,7 +122,7 @@ class _CounterViewState extends State<CounterView> {
             key: const Key('increment'),
             child: const Icon(Icons.add_outlined),
             onPressed: () {
-              counterViewModel.increment();
+              ref.read(counterViewModelProvider.notifier).increment();
             },
           ),
           const SizedBox(height: 8.0),
@@ -123,11 +130,35 @@ class _CounterViewState extends State<CounterView> {
             key: const Key('decrement'),
             child: const Icon(Icons.remove_outlined),
             onPressed: () {
-              counterViewModel.decrement();
+              ref.read(counterViewModelProvider.notifier).decrement();
             },
           ),
         ],
       ),
+    );
+  }
+}
+
+@protected
+typedef StateBuilder<T> = Widget Function(BuildContext context, T state);
+
+class StateBuilderWidget<T> extends StatelessWidget {
+  final ProviderListenable<T> provider;
+  final StateBuilder<T> builder;
+
+  const StateBuilderWidget({
+    super.key,
+    required this.provider,
+    required this.builder,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer(
+      builder: (context, ref, child) {
+        final state = ref.watch(provider);
+        return builder(context, state);
+      },
     );
   }
 }

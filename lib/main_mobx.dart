@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:mobx/mobx.dart';
+
+part 'main_mobx.g.dart';
 
 void main() {
   runApp(const MyApp());
@@ -30,35 +34,25 @@ class CounterModel {
       CounterModel(counter: counter ?? this.counter);
 }
 
-typedef _ViewModel = ChangeNotifier;
+class CounterViewModel = CounterViewModelBase with _$CounterViewModel;
 
-abstract interface class CounterViewModel extends _ViewModel {
-  CounterModel get model;
+abstract class CounterViewModelBase with Store {
+  @observable
+  CounterModel model = CounterModel();
 
-  void increment();
-  void decrement();
-}
-
-class CounterViewModelImpl extends _ViewModel implements CounterViewModel {
-  CounterModel _model = CounterModel();
-
-  @override
-  CounterModel get model => _model;
-
-  @override
+  @action
   void increment() {
-    _model = _model.copyWith(counter: _model.counter + 1);
+    model = model.copyWith(counter: model.counter + 1);
     _debug();
   }
 
-  @override
+  @action
   void decrement() {
-    _model = _model.copyWith(counter: _model.counter - 1);
+    model = model.copyWith(counter: model.counter - 1);
     _debug();
   }
 
   void _debug() {
-    notifyListeners();
     debugPrint('Counter: ${model.counter}');
   }
 }
@@ -76,13 +70,12 @@ class _CounterViewState extends State<CounterView> {
   @override
   void initState() {
     super.initState();
-    counterViewModel = CounterViewModelImpl();
+    counterViewModel = CounterViewModel();
     debugPrint('COUNTER HASHCODE: ${counterViewModel.hashCode}');
   }
 
   @override
   void dispose() {
-    counterViewModel.dispose();
     super.dispose();
   }
 
@@ -95,9 +88,8 @@ class _CounterViewState extends State<CounterView> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text('You have pushed the button this many times:'),
-            ListenableBuilder(
-              listenable: counterViewModel,
-              builder: (context, child) {
+            StateBuilderWidget(
+              builder: (context) {
                 return Text(
                   '${counterViewModel.model.counter}',
                   style: Theme.of(context).textTheme.headlineMedium,
@@ -129,5 +121,19 @@ class _CounterViewState extends State<CounterView> {
         ],
       ),
     );
+  }
+}
+
+@protected
+typedef StateBuilder = Widget Function(BuildContext context);
+
+class StateBuilderWidget extends StatelessWidget {
+  final StateBuilder builder;
+
+  const StateBuilderWidget({super.key, required this.builder});
+
+  @override
+  Widget build(BuildContext context) {
+    return Observer(builder: (_) => builder(context));
   }
 }

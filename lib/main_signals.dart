@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 
 void main() {
   runApp(const MyApp());
@@ -30,36 +31,35 @@ class CounterModel {
       CounterModel(counter: counter ?? this.counter);
 }
 
-typedef _ViewModel = ChangeNotifier;
+typedef CounterSignal = Signal<CounterModel>;
 
-abstract interface class CounterViewModel extends _ViewModel {
-  CounterModel get model;
+abstract interface class CounterViewModel {
+  CounterSignal get model;
 
   void increment();
   void decrement();
 }
 
-class CounterViewModelImpl extends _ViewModel implements CounterViewModel {
-  CounterModel _model = CounterModel();
+class CounterViewModelImpl implements CounterViewModel {
+  final _model = CounterSignal(CounterModel());
 
   @override
-  CounterModel get model => _model;
+  CounterSignal get model => _model;
 
   @override
   void increment() {
-    _model = _model.copyWith(counter: _model.counter + 1);
+    _model.value = _model.value.copyWith(counter: _model.value.counter + 1);
     _debug();
   }
 
   @override
   void decrement() {
-    _model = _model.copyWith(counter: _model.counter - 1);
+    _model.value = _model.value.copyWith(counter: _model.value.counter - 1);
     _debug();
   }
 
   void _debug() {
-    notifyListeners();
-    debugPrint('Counter: ${model.counter}');
+    debugPrint('Counter: ${model.value.counter}');
   }
 }
 
@@ -82,7 +82,6 @@ class _CounterViewState extends State<CounterView> {
 
   @override
   void dispose() {
-    counterViewModel.dispose();
     super.dispose();
   }
 
@@ -95,11 +94,10 @@ class _CounterViewState extends State<CounterView> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text('You have pushed the button this many times:'),
-            ListenableBuilder(
-              listenable: counterViewModel,
-              builder: (context, child) {
+            Watch.builder(
+              builder: (context) {
                 return Text(
-                  '${counterViewModel.model.counter}',
+                  '${counterViewModel.model.value.counter}',
                   style: Theme.of(context).textTheme.headlineMedium,
                 );
               },

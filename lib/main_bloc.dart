@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() {
   runApp(const MyApp());
@@ -30,36 +31,32 @@ class CounterModel {
       CounterModel(counter: counter ?? this.counter);
 }
 
-typedef _ViewModel = ChangeNotifier;
+typedef _ViewModel = Cubit<CounterModel>;
 
 abstract interface class CounterViewModel extends _ViewModel {
-  CounterModel get model;
+  CounterViewModel() : super(CounterModel());
 
   void increment();
   void decrement();
 }
 
 class CounterViewModelImpl extends _ViewModel implements CounterViewModel {
-  CounterModel _model = CounterModel();
-
-  @override
-  CounterModel get model => _model;
+  CounterViewModelImpl() : super(CounterModel());
 
   @override
   void increment() {
-    _model = _model.copyWith(counter: _model.counter + 1);
+    emit(state.copyWith(counter: state.counter + 1));
     _debug();
   }
 
   @override
   void decrement() {
-    _model = _model.copyWith(counter: _model.counter - 1);
+    emit(state.copyWith(counter: state.counter - 1));
     _debug();
   }
 
   void _debug() {
-    notifyListeners();
-    debugPrint('Counter: ${model.counter}');
+    debugPrint('Counter: ${state.counter}');
   }
 }
 
@@ -82,7 +79,7 @@ class _CounterViewState extends State<CounterView> {
 
   @override
   void dispose() {
-    counterViewModel.dispose();
+    counterViewModel.close();
     super.dispose();
   }
 
@@ -95,11 +92,11 @@ class _CounterViewState extends State<CounterView> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text('You have pushed the button this many times:'),
-            ListenableBuilder(
-              listenable: counterViewModel,
+            StateBuilderWidget<CounterViewModel, CounterModel>(
+              viewModel: counterViewModel,
               builder: (context, child) {
                 return Text(
-                  '${counterViewModel.model.counter}',
+                  '${counterViewModel.state.counter}',
                   style: Theme.of(context).textTheme.headlineMedium,
                 );
               },
@@ -127,6 +124,35 @@ class _CounterViewState extends State<CounterView> {
             },
           ),
         ],
+      ),
+    );
+  }
+}
+
+@protected
+typedef StateBuilder<S> = Widget Function(BuildContext context, S state);
+
+class StateBuilderWidget<V extends Cubit<S>, S> extends StatelessWidget {
+  final V viewModel;
+  final StateBuilder<S> builder;
+  final Widget? child;
+
+  const StateBuilderWidget({
+    super.key,
+    required this.viewModel,
+    required this.builder,
+    this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<V>.value(
+      value: viewModel,
+      child: BlocBuilder<V, S>(
+        bloc: viewModel,
+        builder: (context, state) {
+          return builder(context, state);
+        },
       ),
     );
   }
