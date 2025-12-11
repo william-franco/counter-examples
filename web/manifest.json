@@ -1,11 +1,11 @@
 {
-    "name": "theme_provider",
-    "short_name": "theme_provider",
+    "name": "counter_examples",
+    "short_name": "counter_examples",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "App to change theme with provider.",
+    "description": "A new Flutter project.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
