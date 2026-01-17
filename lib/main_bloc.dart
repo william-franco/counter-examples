@@ -31,10 +31,10 @@ class CounterModel {
       CounterModel(counter: counter ?? this.counter);
 }
 
-typedef _ViewModel = Cubit<CounterModel>;
+typedef _ViewModel = StateManagement<CounterModel>;
 
 abstract interface class CounterViewModel extends _ViewModel {
-  CounterViewModel() : super(CounterModel());
+  CounterViewModel(super.initialState);
 
   void increment();
   void decrement();
@@ -126,6 +126,17 @@ class _CounterViewState extends State<CounterView> {
         ],
       ),
     );
+  }
+}
+
+abstract class StateManagement<T> extends Cubit<T> {
+  StateManagement(super.initialState);
+
+  @protected
+  void emitState(T newState) {
+    if (state != newState) {
+      emit(newState);
+    }
   }
 }
 
