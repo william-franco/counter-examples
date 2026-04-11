@@ -23,44 +23,44 @@ class MyApp extends StatelessWidget {
 }
 
 class CounterModel {
-  final int counter;
+  final int count;
 
-  CounterModel({this.counter = 0});
+  const CounterModel({this.count = 0});
 
-  CounterModel copyWith({int? counter}) =>
-      CounterModel(counter: counter ?? this.counter);
+  CounterModel copyWith({int? counter}) {
+    return CounterModel(count: counter ?? count);
+  }
+
+  @override
+  String toString() => 'CounterModel(counter: $count)';
 }
 
-typedef _ViewModel = ChangeNotifier;
+typedef _ViewModel = StateManagement<CounterModel>;
 
 abstract interface class CounterViewModel extends _ViewModel {
-  CounterModel get model;
-
   void increment();
   void decrement();
 }
 
 class CounterViewModelImpl extends _ViewModel implements CounterViewModel {
-  CounterModel _model = CounterModel();
-
   @override
-  CounterModel get model => _model;
+  CounterModel build() => CounterModel();
 
   @override
   void increment() {
-    _model = _model.copyWith(counter: _model.counter + 1);
-    _debug();
+    final model = state.copyWith(counter: state.count + 1);
+    _emit(model);
   }
 
   @override
   void decrement() {
-    _model = _model.copyWith(counter: _model.counter - 1);
-    _debug();
+    final model = state.copyWith(counter: state.count - 1);
+    _emit(model);
   }
 
-  void _debug() {
-    notifyListeners();
-    debugPrint('Counter: ${model.counter}');
+  void _emit(CounterModel newState) {
+    emitState(newState);
+    debugPrint('Counter: ${state.count}');
   }
 }
 
@@ -96,11 +96,11 @@ class _CounterViewState extends State<CounterView> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text('You have pushed the button this many times:'),
-            StateBuilderWidget<CounterViewModel>(
+            StateBuilderWidget<CounterViewModel, CounterModel>(
               viewModel: counterViewModel,
-              builder: (context, state) {
+              builder: (context, counterModel) {
                 return Text(
-                  '${state.model.counter}',
+                  '${counterModel.count}',
                   style: Theme.of(context).textTheme.headlineMedium,
                 );
               },
@@ -133,28 +133,75 @@ class _CounterViewState extends State<CounterView> {
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+abstract class StateManagement<T> extends ChangeNotifier {
+  late T _state;
+
+  StateManagement() {
+    _state = build();
+  }
+
+  @protected
+  T build();
+
+  T get state => _state;
+
+  @protected
+  void emitState(T newState) {
+    if (identical(_state, newState)) return;
+    _state = newState;
+    notifyListeners();
+  }
+
+  @override
+  String toString() => 'StateManagement<$T>(state: $_state)';
+}
+
 @protected
 typedef StateBuilder<S> = Widget Function(BuildContext context, S state);
 
-class StateBuilderWidget<T extends ChangeNotifier> extends StatelessWidget {
-  final T viewModel;
-  final StateBuilder<T> builder;
+class StateBuilderWidget<V extends StateManagement<S>, S>
+    extends StatelessWidget {
+  final V viewModel;
+  final StateBuilder<S> builder;
+  final Widget? child;
 
   const StateBuilderWidget({
     super.key,
-    required this.builder,
     required this.viewModel,
+    required this.builder,
+    this.child,
   });
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<T>.value(
+    return ChangeNotifierProvider<V>.value(
       value: viewModel,
-      child: Consumer<T>(
-        builder: (context, notifier, child) {
-          return builder(context, notifier);
+      child: Consumer<V>(
+        builder: (context, vm, child) {
+          return builder(context, vm.state);
         },
+        child: child,
       ),
     );
   }
+}
+
+extension ContextLocator on BuildContext {
+  T inject<T>() {
+    return Provider.of<T>(this, listen: false);
+  }
+
+  T observe<T>() {
+    return Provider.of<T>(this);
+  }
+
+  // T inject<T>() {
+  //   return read<T>();
+  // }
+
+  // T observe<T>() {
+  //   return watch<T>();
+  // }
 }

@@ -23,12 +23,16 @@ class MyApp extends StatelessWidget {
 }
 
 class CounterModel {
-  final int counter;
+  final int count;
 
-  CounterModel({this.counter = 0});
+  const CounterModel({this.count = 0});
 
-  CounterModel copyWith({int? counter}) =>
-      CounterModel(counter: counter ?? this.counter);
+  CounterModel copyWith({int? counter}) {
+    return CounterModel(count: counter ?? count);
+  }
+
+  @override
+  String toString() => 'CounterModel(counter: $count)';
 }
 
 typedef CounterSignal = Signal<CounterModel>;
@@ -48,18 +52,18 @@ class CounterViewModelImpl implements CounterViewModel {
 
   @override
   void increment() {
-    _model.value = _model.value.copyWith(counter: _model.value.counter + 1);
+    _model.value = _model.value.copyWith(counter: _model.value.count + 1);
     _debug();
   }
 
   @override
   void decrement() {
-    _model.value = _model.value.copyWith(counter: _model.value.counter - 1);
+    _model.value = _model.value.copyWith(counter: _model.value.count - 1);
     _debug();
   }
 
   void _debug() {
-    debugPrint('Counter: ${model.value.counter}');
+    debugPrint('Counter: ${model.value.count}');
   }
 }
 
@@ -94,10 +98,10 @@ class _CounterViewState extends State<CounterView> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text('You have pushed the button this many times:'),
-            Watch.builder(
+            StateBuilderWidget(
               builder: (context) {
                 return Text(
-                  '${counterViewModel.model.value.counter}',
+                  '${counterViewModel.model.value.count}',
                   style: Theme.of(context).textTheme.headlineMedium,
                 );
               },
@@ -127,5 +131,21 @@ class _CounterViewState extends State<CounterView> {
         ],
       ),
     );
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+@protected
+typedef StateBuilder = Widget Function(BuildContext context);
+
+class StateBuilderWidget extends StatelessWidget {
+  final StateBuilder builder;
+
+  const StateBuilderWidget({super.key, required this.builder});
+
+  @override
+  Widget build(BuildContext context) {
+    return Watch.builder(builder: (_) => builder(context));
   }
 }

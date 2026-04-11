@@ -29,12 +29,16 @@ final counterViewModelProvider =
     );
 
 class CounterModel {
-  final int counter;
+  final int count;
 
-  CounterModel({this.counter = 0});
+  const CounterModel({this.count = 0});
 
-  CounterModel copyWith({int? counter}) =>
-      CounterModel(counter: counter ?? this.counter);
+  CounterModel copyWith({int? counter}) {
+    return CounterModel(count: counter ?? count);
+  }
+
+  @override
+  String toString() => 'CounterModel(counter: $count)';
 }
 
 typedef _ViewModel = Notifier<CounterModel>;
@@ -57,18 +61,18 @@ class CounterViewModelImpl extends _ViewModel implements CounterViewModel {
 
   @override
   void increment() {
-    state = state.copyWith(counter: state.counter + 1);
+    state = state.copyWith(counter: state.count + 1);
     _debug();
   }
 
   @override
   void decrement() {
-    state = state.copyWith(counter: state.counter - 1);
+    state = state.copyWith(counter: state.count - 1);
     _debug();
   }
 
   void _debug() {
-    debugPrint('Counter: ${state.counter}');
+    debugPrint('Counter: ${state.count}');
   }
 }
 
@@ -104,9 +108,9 @@ class _CounterViewState extends ConsumerState<CounterView> {
             const Text('You have pushed the button this many times:'),
             StateBuilderWidget<CounterModel>(
               provider: counterViewModelProvider,
-              builder: (context, state) {
+              builder: (context, counterModel) {
                 return Text(
-                  '${state.counter}',
+                  '${counterModel.count}',
                   style: Theme.of(context).textTheme.headlineMedium,
                 );
               },
@@ -138,6 +142,8 @@ class _CounterViewState extends ConsumerState<CounterView> {
     );
   }
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 @protected
 typedef StateBuilder<T> = Widget Function(BuildContext context, T state);

@@ -26,12 +26,16 @@ class MyApp extends StatelessWidget {
 }
 
 class CounterModel {
-  final int counter;
+  final int count;
 
-  CounterModel({this.counter = 0});
+  const CounterModel({this.count = 0});
 
-  CounterModel copyWith({int? counter}) =>
-      CounterModel(counter: counter ?? this.counter);
+  CounterModel copyWith({int? counter}) {
+    return CounterModel(count: counter ?? count);
+  }
+
+  @override
+  String toString() => 'CounterModel(counter: $count)';
 }
 
 class CounterViewModel = CounterViewModelBase with _$CounterViewModel;
@@ -42,18 +46,18 @@ abstract class CounterViewModelBase with Store {
 
   @action
   void increment() {
-    model = model.copyWith(counter: model.counter + 1);
+    model = model.copyWith(counter: model.count + 1);
     _debug();
   }
 
   @action
   void decrement() {
-    model = model.copyWith(counter: model.counter - 1);
+    model = model.copyWith(counter: model.count - 1);
     _debug();
   }
 
   void _debug() {
-    debugPrint('Counter: ${model.counter}');
+    debugPrint('Counter: ${model.count}');
   }
 }
 
@@ -91,7 +95,7 @@ class _CounterViewState extends State<CounterView> {
             StateBuilderWidget(
               builder: (context) {
                 return Text(
-                  '${counterViewModel.model.counter}',
+                  '${counterViewModel.model.count}',
                   style: Theme.of(context).textTheme.headlineMedium,
                 );
               },
@@ -123,6 +127,8 @@ class _CounterViewState extends State<CounterView> {
     );
   }
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 @protected
 typedef StateBuilder = Widget Function(BuildContext context);

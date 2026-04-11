@@ -23,12 +23,16 @@ class MyApp extends StatelessWidget {
 }
 
 class CounterModel {
-  final int counter;
+  final int count;
 
-  CounterModel({this.counter = 0});
+  const CounterModel({this.count = 0});
 
-  CounterModel copyWith({int? counter}) =>
-      CounterModel(counter: counter ?? this.counter);
+  CounterModel copyWith({int? counter}) {
+    return CounterModel(count: counter ?? count);
+  }
+
+  @override
+  String toString() => 'CounterModel(counter: $count)';
 }
 
 typedef _ViewModel = StateManagement<CounterModel>;
@@ -45,18 +49,18 @@ class CounterViewModelImpl extends _ViewModel implements CounterViewModel {
 
   @override
   void increment() {
-    emit(state.copyWith(counter: state.counter + 1));
+    emit(state.copyWith(counter: state.count + 1));
     _debug();
   }
 
   @override
   void decrement() {
-    emit(state.copyWith(counter: state.counter - 1));
+    emit(state.copyWith(counter: state.count - 1));
     _debug();
   }
 
   void _debug() {
-    debugPrint('Counter: ${state.counter}');
+    debugPrint('Counter: ${state.count}');
   }
 }
 
@@ -94,9 +98,9 @@ class _CounterViewState extends State<CounterView> {
             const Text('You have pushed the button this many times:'),
             StateBuilderWidget<CounterViewModel, CounterModel>(
               viewModel: counterViewModel,
-              builder: (context, child) {
+              builder: (context, counterModel) {
                 return Text(
-                  '${counterViewModel.state.counter}',
+                  '${counterModel.count}',
                   style: Theme.of(context).textTheme.headlineMedium,
                 );
               },
@@ -128,6 +132,8 @@ class _CounterViewState extends State<CounterView> {
     );
   }
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 abstract class StateManagement<T> extends Cubit<T> {
   StateManagement(super.initialState);
