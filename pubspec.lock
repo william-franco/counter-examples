@@ -77,10 +77,10 @@ packages:
     dependency: "direct dev"
     description:
       name: build_runner
-      sha256: "7981eb922842c77033026eb4341d5af651562008cdb116bdfa31fc46516b6462"
+      sha256: "1523ce62448ebac2c15a8ba5fbad8acac169788658a7dd2a1c2d9c2a9318b9a6"
       url: "https://pub.dev"
     source: hosted
-    version: "2.12.2"
+    version: "2.15.0"
   built_collection:
     dependency: transitive
     description:
@@ -129,14 +129,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.2"
-  code_builder:
-    dependency: transitive
-    description:
-      name: code_builder
-      sha256: "11654819532ba94c34de52ff5feb52bd81cba1de00ef2ed622fd50295f9d4243"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.11.0"
   collection:
     dependency: transitive
     description:
@@ -242,10 +234,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_riverpod
-      sha256: e2026c72738a925a60db30258ff1f29974e40716749f3c9850aabf34ffc1a14c
+      sha256: "4e166be88e1dbbaa34a280bdb744aeae73b7ef25fdf8db7a3bb776760a3648e2"
       url: "https://pub.dev"
     source: hosted
-    version: "3.2.1"
+    version: "3.3.1"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -391,10 +383,10 @@ packages:
     dependency: "direct dev"
     description:
       name: mobx_codegen
-      sha256: "406051a76157fb0a562700110bd2bedd85c959b1cd2d3df740c706bc07539c33"
+      sha256: "6529bcae074838004b58ad01fbe4966be182a176aacfb723686985986ebac19f"
       url: "https://pub.dev"
     source: hosted
-    version: "2.7.6"
+    version: "2.7.7"
   nested:
     dependency: transitive
     description:
@@ -705,5 +697,5 @@ packages:
     source: hosted
     version: "3.1.3"
 sdks:
-  dart: ">=3.11.4 <4.0.0"
+  dart: ">=3.11.5 <4.0.0"
   flutter: ">=3.18.0-18.0.pre.54"
