@@ -1,12 +1,32 @@
 # Counter Examples
 
-Side-by-side counter demos using Bloc, Provider, Riverpod, MobX, and Signals.
+Collection of minimal counter apps, each wired with a different state management library.
+
+Compare Provider, Bloc, Riverpod, MobX, and Signals side by side on the same UI problem.
+
+Each entry point lives in its own `main_*.dart` file for quick experimentation.
+
+## Structure
+
+```mermaid
+flowchart TB
+  CounterUI --> ProviderMain
+  CounterUI --> BlocMain
+  CounterUI --> RiverpodMain
+  CounterUI --> MobXMain
+  CounterUI --> SignalsMain
+  ProviderMain --> CounterState
+  BlocMain --> CounterState
+  RiverpodMain --> CounterState
+  MobXMain --> CounterState
+  SignalsMain --> CounterState
+```
 
 ## Stack
 
 | Technology | Version |
 |------------|---------|
-| Dart SDK | ^3.13.2 |
+| Dart SDK | ^3.13.3 |
 | cupertino_icons | ^1.0.8 |
 | flutter_bloc | ^9.1.1 |
 | signals_flutter | ^6.3.0 |
